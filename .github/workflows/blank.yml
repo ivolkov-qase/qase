@@ -1,0 +1,54 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+    inputs:
+      qase_api_base_url:
+        description: 'Qase API URL'
+        required: true
+      qase_report:
+        description: 'Enabled/disabled reporting to Qase'
+        required: true
+      qase_project_code:
+        description: 'Qase project code'
+        required: true
+      qase_run_id:
+        description: 'Qase Run ID'
+        required: true
+      qase_run_complete:
+        description: 'Qase Run autocomplete'
+        required: true
+env:
+  QASE_API_BASE_URL: ${{ inputs.qase_api_base_url }}
+  QASE_REPORT: ${{ inputs.qase_report }}
+  QASE_PROJECT_CODE: ${{ inputs.qase_project_code }}
+  QASE_RUN_ID: ${{ inputs.qase_run_id }}
+  QASE_RUN_COMPLETE: ${{ inputs.qase_run_complete }}
+  QASE_API_TOKEN: ${{ secrets.QASE_API_TOKEN }}
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build-php:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: qase-tms/qase-link-run@main
+        env:
+          QASE_API_TOKEN: ${{ env.QASE_API_TOKEN }}
+
+      # Runs a single command using the runners shell
+      - name: pytest
+        run: pip install pytest
+      # Runs a set of commands using the runners shell
+      - name: qase reporter
+        run: pip install qase-pytest
+      - name: run tests
+        run: pytest --qase-testops-run-complete=true
